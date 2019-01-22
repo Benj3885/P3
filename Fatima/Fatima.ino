@@ -21,8 +21,8 @@ const double alpha = -0.0713;
 const double DATA2RAD = 0.00153435538636864;// Conversion from the motors' units for angle to radians
 const double RAD2DATA = 651.7395; // Conversion from radians to the motors' units for angle
 int32_t outData[4] = {2048, 2600, 1536, 2048}; // The data to sent to the robot
-const double outDataLimits[2][4] = {{-M_PI, -0.38052, -1.8458, -0.03529}, {M_PI, M_PI, 1.8443, 1.5712}};
-const double posRefLim[2][4] = {{0.00, -0.2325, -2048 * DATA2RAD, (1615 - 2048) * DATA2RAD}, {0.46, 0.38, 2048 * DATA2RAD, 3330 * DATA2RAD}};
+const double outDataLimits[2][4] = {{-M_PI, -0.38052, -1.8458, -0.03529}, {M_PI, M_PI, 1.8443, 1.9210}};
+const double posRefLim[2][4] = {{0.00, -0.2325, -2048 * DATA2RAD, (1615 - 2048) * DATA2RAD}, {0.46, 0.38, 2048 * DATA2RAD, 3300 * DATA2RAD}};
 
 CrustCrawler bot;
 
@@ -641,23 +641,8 @@ void conf() { //Enters Conf mode
 }
 
 void sleeping () { //Sets the robot to sleep
-  int16_t target[3] = {2048, 2600, 1536}; // The home position, needed for robot to go to sleep
 
-  int16_t difference[3] = {abs(outData[0] - target[0]), abs(outData[1] - target[1]), abs(outData[2] - target[2])}; // Finds the size of the movements
-
-  float stepVel = 468.8775; // for profileVelocity of 30, used to calculate move timeMove that is the time needed for the movement
-  float timeMove = (difference[1] > difference[2] ? difference[1] : difference[2]) / stepVel; // Does biggest move over speed to find time needed for mvoement
-
-  outData[1] = target[1]; // Goes to the home position for joint 2 and 3 in order to not bump into stuff when rotating about z
-  outData[2] = target[2];
-  outData[3] = 3200; // Opens gripper a lot
-
-  delay(timeMove * 1000);
-
-  timeMove = difference[0] / stepVel; // Does the same thing for joint 1
-  outData[0] = target[0];
-  
-  delay(timeMove * 1000 + 500); // Added half a second for the robot to better settle before turning off torque
+  goHome(1);
 
   moveMode = 4;  
   while(!BreakFree){}
@@ -867,8 +852,8 @@ void freecontrol() { // The free control function that stops the code when using
     if(EMG_state == 1 && dir == -1) // Checks if the user wants to exit Free control mode
       break; 
   }
-  
   moveMode = 0;
+  goHome(false);
   exitfunction();
 }
 
@@ -905,6 +890,29 @@ void writeRegisters() { // Writes the new values to the SHIFT registers
     digitalWrite(SRCLK_Pin, HIGH);
   }
   digitalWrite(RCLK_Pin, HIGH);
+}
+
+void goHome(bool sleeping){
+  int16_t target[3] = {2048, 2600, 1536}; // The home position, needed for robot to go to sleep
+
+  int16_t difference[3] = {abs(outData[0] - target[0]), abs(outData[1] - target[1]), abs(outData[2] - target[2])}; // Finds the size of the movements
+
+  float stepVel = 468.8775; // for profileVelocity of 30, used to calculate move timeMove that is the time needed for the movement
+  float timeMove = (difference[1] > difference[2] ? difference[1] : difference[2]) / stepVel; // Does biggest move over speed to find time needed for mvoement
+
+  outData[1] = target[1]; // Goes to the home position for joint 2 and 3 in order to not bump into stuff when rotating about z
+  outData[2] = target[2];
+  outData[3] = 3200; // Opens gripper a lot
+
+  delay(timeMove * 1000);
+
+  timeMove = difference[0] / stepVel; // Does the same thing for joint 1
+  outData[0] = target[0];
+  
+  delay(timeMove * 1000 + 500); // Added half a second for the robot to better settle before turning off torque
+
+  if(!sleeping)
+    outData[3] = 2048;
 }
 
 //set an individual pin HIGH or LOW
