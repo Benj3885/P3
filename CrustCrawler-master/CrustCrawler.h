@@ -21,7 +21,7 @@ private:
 	const uint8_t _ID_ARR[4] = { 1, 2, 3, _GRIPPER_ID};		//servo's IDs
 	const uint8_t _GRIPPER_ID_ARR[2] = { 4, 5 };		//IDs of the gripper's servos
 	const uint16_t _MIN_POSITION[4] = { 0, 1800, 845, 2030 };		//servos minimum position limit
-	const uint16_t _MAX_POSITION[4] = { 4095, 4095, 3250, 3072 };		//servos maximum position limit
+	const uint16_t _MAX_POSITION[4] = { 4095, 4095, 3250, 3300 };		//servos maximum position limit
 	uint8_t _arrTx[TX_BUFFER_SIZE] = { 0xFF, 0xFF, 0xFD, 0x00 };		//stores the instruction packet of the servos
 	uint8_t _arrRx[RX_BUFFER_SIZE] = { 0xFF, 0xFF, 0xFD, 0x00 };		//stores the return status of the servos
 uint8_t _controlPin; //pin to control the direction of the data transmition
